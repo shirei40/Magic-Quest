@@ -70,9 +70,9 @@
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             border: none;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: 10px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: transform 0.1s ease, background 0.2s ease, filter 0.1s ease;
             text-align: left;
@@ -86,6 +86,10 @@
         }
         .bet-grid button:hover {
             background: linear-gradient(135deg, #2563eb, #1e40af);
+        }
+        .cost-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
         }
         #result-box {
             background-color: #0f172a;
@@ -129,15 +133,15 @@
         </div>
 
         <div class="bet-grid">
-            <button onclick="playTier(1)"><span><strong>Bet 1</strong> (Cost: 2)</span><span>Win: 10 🪙</span></button>
-            <button onclick="playTier(10)"><span><strong>Bet 10</strong> (Cost: 20)</span><span>Win: 100 🪙</span></button>
-            <button onclick="playTier(25)"><span><strong>Bet 25</strong> (Cost: 50)</span><span>Win: 520 💎</span></button>
-            <button onclick="playTier(50)"><span><strong>Bet 50</strong> (Cost: 100)</span><span>Win: 990 🔮</span></button>
-            <button onclick="playTier(100)"><span><strong>Bet 100</strong> (Cost: 200)</span><span>Win: 2,990 ⭐</span></button>
-            <button onclick="playTier(200)"><span><strong>Bet 200</strong> (Cost: 400)</span><span>Win: 5,200 🛡️</span></button>
-            <button onclick="playTier(300)"><span><strong>Bet 300</strong> (Cost: 600)</span><span>Win: 13,140 ⚔️</span></button>
-            <button onclick="playTier(500)"><span><strong>Bet 500</strong> (Cost: 1000)</span><span>Win: 33,440 👑</span></button>
-            <button onclick="playTier(1000)"><span><strong>Bet 1000</strong> (Cost: 2000)</span><span>Win: 99,990 🐉</span></button>
+            <button onclick="playTier(1)"><span><strong>Bet 1</strong> 🪙</span><span class="cost-label">Cost: 2 credits</span></button>
+            <button onclick="playTier(10)"><span><strong>Bet 10</strong> 🪙</span><span class="cost-label">Cost: 20 credits</span></button>
+            <button onclick="playTier(25)"><span><strong>Bet 25</strong> 💎</span><span class="cost-label">Cost: 50 credits</span></button>
+            <button onclick="playTier(50)"><span><strong>Bet 50</strong> 🔮</span><span class="cost-label">Cost: 100 credits</span></button>
+            <button onclick="playTier(100)"><span><strong>Bet 100</strong> ⭐</span><span class="cost-label">Cost: 200 credits</span></button>
+            <button onclick="playTier(200)"><span><strong>Bet 200</strong> 🛡️</span><span class="cost-label">Cost: 400 credits</span></button>
+            <button onclick="playTier(300)"><span><strong>Bet 300</strong> ⚔️</span><span class="cost-label">Cost: 600 credits</span></button>
+            <button onclick="playTier(500)"><span><strong>Bet 500</strong> 👑</span><span class="cost-label">Cost: 1,000 credits</span></button>
+            <button onclick="playTier(1000)"><span><strong>Bet 1000</strong> 🐉</span><span class="cost-label">Cost: 2,000 credits</span></button>
         </div>
 
         <div id="result-box">

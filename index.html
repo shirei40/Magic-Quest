@@ -110,21 +110,22 @@
             transition: all 0.3s ease;
         }
         
-        /* Pop-up Animated Emojis */
+        /* Prominent popup animation styling */
         #outcome-icon {
-            font-size: 2rem;
+            font-size: 2.5rem;
             display: none;
+            line-height: 1;
         }
         
-        @keyframes popUpBounce {
-            0% { transform: scale(0); opacity: 0; }
-            60% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes dramaticPop {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
         }
         
         .animate-pop {
-            display: inline-block !important;
-            animation: popUpBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            display: block !important;
+            animation: dramaticPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         #outcome-text {
@@ -244,7 +245,7 @@
             var outcomeText = document.getElementById("outcome-text");
             var outcomeIcon = document.getElementById("outcome-icon");
 
-            // Hide icon during loading phase
+            // Hide everything and show loading state
             outcomeIcon.style.display = "none";
             outcomeIcon.className = "";
             resultBox.className = "";
@@ -308,18 +309,30 @@
                 resultBox.className = "";
                 void resultBox.offsetWidth; 
 
-                // Trigger smooth pop-up animation with direct icons
+                // Step 1: Clear text temporarily so the icon can pop up dramatically by itself first!
+                outcomeText.innerHTML = "";
+                
                 if (isWin) {
                     outcomeIcon.innerHTML = "🏆";
-                    outcomeIcon.classList.add("animate-pop");
-                    outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
                     resultBox.classList.add("win-anim");
                 } else {
                     outcomeIcon.innerHTML = "💥";
-                    outcomeIcon.classList.add("animate-pop");
-                    outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
                     resultBox.classList.add("lose-anim");
                 }
+                
+                // Trigger the bouncing scale-up pop animation on the icon
+                outcomeIcon.className = "";
+                void outcomeIcon.offsetWidth;
+                outcomeIcon.classList.add("animate-pop");
+
+                // Step 2: Brief pause (300ms), then display the text smoothly underneath the popped icon
+                setTimeout(function() {
+                    if (isWin) {
+                        outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
+                    } else {
+                        outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
+                    }
+                }, 250);
 
                 isPlaying = false;
                 setButtonsEnabled(true);

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventurer Game</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🗡️ Adventurer</h1>
+        <div class="score-board">
+            <p>Tokens: <span id="balance">500</span></p>
+        </div>
+
+        <div class="bet-grid">
+            <!-- Example Tiers -->
+            <button onclick="playTier(10)">
+                <strong>Bet 10</strong><br>Cost: 20 | Win: 100 🪙
+            </button>
+            <button onclick="playTier(100)">
+                <strong>Bet 100 ⭐</strong><br>Cost: 200 | Win: 2,990 💍
+            </button>
+            <button onclick="playTier(1000)">
+                <strong>Bet 1000 🔥</strong><br>Cost: 2000 | Win: 99,990 🐉
+            </button>
+        </div>
+
+        <div id="result-box">
+            <p id="outcome-text">Choose a bet to play!</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

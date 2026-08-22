@@ -101,25 +101,38 @@
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #334155;
-            min-height: 100px;
+            min-height: 90px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             transition: all 0.3s ease;
         }
-        #outcome-img {
-            width: 56px;
-            height: 56px;
-            object-fit: contain;
+        
+        /* Pop-up Animated Emojis */
+        #outcome-icon {
+            font-size: 2rem;
             display: none;
         }
+        
+        @keyframes popUpBounce {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-pop {
+            display: inline-block !important;
+            animation: popUpBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
         #outcome-text {
             margin: 0;
             font-size: 0.9rem;
             line-height: 1.4;
         }
+
         @keyframes popWin {
             0% { transform: scale(0.95); background-color: #0f172a; border-color: #334155; }
             50% { transform: scale(1.05); background-color: #064e3b; border-color: #4ade80; }
@@ -165,7 +178,7 @@
         </div>
 
         <div id="result-box">
-            <img id="outcome-img" src="" alt="Outcome animation">
+            <div id="outcome-icon"></div>
             <p id="outcome-text">Choose a quest to embark on!</p>
         </div>
     </div>
@@ -229,9 +242,11 @@
 
             var resultBox = document.getElementById("result-box");
             var outcomeText = document.getElementById("outcome-text");
-            var outcomeImg = document.getElementById("outcome-img");
+            var outcomeIcon = document.getElementById("outcome-icon");
 
-            outcomeImg.style.display = "none";
+            // Hide icon during loading phase
+            outcomeIcon.style.display = "none";
+            outcomeIcon.className = "";
             resultBox.className = "";
             resultBox.classList.add("loading-anim");
             
@@ -293,15 +308,15 @@
                 resultBox.className = "";
                 void resultBox.offsetWidth; 
 
-                // Updated direct asset links for high compatibility
+                // Trigger smooth pop-up animation with direct icons
                 if (isWin) {
-                    outcomeImg.src = "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3RkdnVjYnU5NHBlanZqN204NW5xM2ptdjR2bjE2djlnMnhwYmN1eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26ufdipQqU2lhNA4g/giphy.gif";
-                    outcomeImg.style.display = "block";
+                    outcomeIcon.innerHTML = "🏆";
+                    outcomeIcon.classList.add("animate-pop");
                     outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
                     resultBox.classList.add("win-anim");
                 } else {
-                    outcomeImg.src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmtjcG53Z3NqNHl0bTQ2aXF2dG04Y3hjdnhzNDZ4bzV3cXN3YmN0ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6ZtaO9BZHcOjmErm/giphy.gif";
-                    outcomeImg.style.display = "block";
+                    outcomeIcon.innerHTML = "💥";
+                    outcomeIcon.classList.add("animate-pop");
                     outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
                     resultBox.classList.add("lose-anim");
                 }

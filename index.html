@@ -81,7 +81,7 @@
             align-items: center;
         }
         .bet-grid button:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
             transform: none !important;
         }
@@ -105,36 +105,35 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: border-color 0.3s ease, background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
         #outcome-text {
             margin: 0;
             font-size: 0.9rem;
             line-height: 1.4;
         }
-        @keyframes winPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); border-color: #4ade80; background-color: #064e3b; }
-            100% { transform: scale(1); }
+        @keyframes popWin {
+            0% { transform: scale(0.95); background-color: #0f172a; border-color: #334155; }
+            50% { transform: scale(1.05); background-color: #064e3b; border-color: #4ade80; }
+            100% { transform: scale(1); background-color: #0f172a; border-color: #4ade80; }
         }
-        @keyframes loseShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); border-color: #f87171; }
-            75% { transform: translateX(4px); border-color: #f87171; }
+        @keyframes popLose {
+            0% { transform: scale(0.95); background-color: #0f172a; border-color: #334155; }
+            50% { transform: scale(1.05); background-color: #7f1d1d; border-color: #f87171; }
+            100% { transform: scale(1); background-color: #0f172a; border-color: #f87171; }
         }
-        @keyframes loadingGlow {
-            0% { border-color: #334155; }
-            50% { border-color: #38bdf8; background-color: #1e293b; }
-            100% { border-color: #334155; }
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; color: #38bdf8; }
         }
         .win-anim {
-            animation: winPulse 0.4s ease;
+            animation: popWin 0.4s ease forwards;
         }
         .lose-anim {
-            animation: loseShake 0.3s ease;
+            animation: popLose 0.4s ease forwards;
         }
         .loading-anim {
-            animation: loadingGlow 0.6s infinite ease-in-out;
+            animation: loadingPulse 0.5s infinite ease-in-out;
         }
     </style>
 </head>
@@ -189,7 +188,7 @@
         var tokens = 500;
         var standardWinChance = 0.40;
         var highTierWinChance = 0.15;
-        var isPlaying = false; // Lockout tracker
+        var isPlaying = false;
 
         function setButtonsEnabled(enabled) {
             var buttons = document.querySelectorAll("#button-container button");
@@ -199,7 +198,7 @@
         }
 
         function playTier(betAmount) {
-            if (isPlaying) return; // Prevent spam clicking
+            if (isPlaying) return;
             
             var tier = betTiers[betAmount];
             
@@ -213,9 +212,8 @@
             }
 
             isPlaying = true;
-            setButtonsEnabled(false); // Lock buttons down
+            setButtonsEnabled(false);
 
-            // Deduct cost immediately
             tokens -= tier.cost;
             var balanceEl = document.getElementById("balance");
             balanceEl.innerText = tokens;
@@ -223,11 +221,10 @@
             var resultBox = document.getElementById("result-box");
             var outcomeText = document.getElementById("outcome-text");
 
-            // Clear previous animations and start loading suspense effect
+            // Reset classes and trigger loading animation
             resultBox.className = "";
             resultBox.classList.add("loading-anim");
             
-            // Suspension flavor texts
             var steps = [
                 "⚔️ Venturing into the unknown...",
                 "🎲 Rolling fate...",
@@ -237,7 +234,6 @@
             var stepIndex = 0;
             outcomeText.innerHTML = steps[0];
 
-            // Cycle text briefly to build anticipation (takes 900ms total)
             var interval = setInterval(function() {
                 stepIndex++;
                 if (stepIndex < steps.length) {
@@ -248,7 +244,6 @@
             setTimeout(function() {
                 clearInterval(interval);
                 
-                // Calculate actual outcome after suspense delay
                 var activeWinChance = tier.highTier ? highTierWinChance : standardWinChance;
                 var isWin = Math.random() <= activeWinChance;
                 var finalPayout = 0;
@@ -279,15 +274,16 @@
 
                 tokens += finalPayout;
                 
-                // Update balance with pulse animation
                 balanceEl.innerText = tokens;
                 balanceEl.classList.add("pulse-balance");
                 setTimeout(function() {
                     balanceEl.classList.remove("pulse-balance");
                 }, 200);
 
-                // Display final result and apply win/loss animations
-                resultBox.className = ""; // clear loading
+                // Force DOM reflow so the animation re-triggers cleanly
+                resultBox.className = "";
+                void resultBox.offsetWidth; 
+
                 if (isWin) {
                     outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
                     resultBox.classList.add("win-anim");
@@ -296,11 +292,10 @@
                     resultBox.classList.add("lose-anim");
                 }
 
-                // Unlock buttons for the next quest
                 isPlaying = false;
                 setButtonsEnabled(true);
 
-            }, 900); // 900ms suspense duration
+            }, 1000);
         }
     </script>
 </body>

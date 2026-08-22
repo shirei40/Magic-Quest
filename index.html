@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Quest</title>
+    <title>Magic Quest - RPG Adventure</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -19,42 +19,89 @@
         }
         .game-container {
             background-color: #1e293b;
-            padding: 24px;
+            padding: 20px;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             width: 100%;
             max-width: 420px;
             text-align: center;
             box-sizing: border-box;
+            border: 1px solid #334155;
+            transition: border-color 0.3s ease;
         }
         h1 {
             margin-top: 0;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: #38bdf8;
+            margin-bottom: 4px;
         }
-        .score-board {
+        #zone-badge {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: #334155;
+            padding: 3px 8px;
+            border-radius: 12px;
+            color: #cbd5e1;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .stats-panel {
             background-color: #0f172a;
-            padding: 12px;
+            padding: 10px 14px;
             border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             border: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
         }
         #balance {
             color: #4ade80;
-            display: inline-block;
+            font-weight: bold;
             transition: transform 0.2s ease, color 0.2s ease;
         }
         .pulse-balance {
-            transform: scale(1.2);
+            transform: scale(1.15);
             color: #facc15 !important;
         }
+        
+        /* XP Bar Styling */
+        .xp-container {
+            background-color: #0f172a;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #334155;
+            text-align: left;
+        }
+        .xp-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        .xp-bar-bg {
+            width: 100%;
+            height: 6px;
+            background-color: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
         .bet-grid {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 260px;
+            gap: 8px;
+            max-height: 220px;
             overflow-y: auto;
             padding-right: 4px;
             margin-bottom: 16px;
@@ -72,7 +119,7 @@
             border: none;
             padding: 10px 14px;
             border-radius: 10px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: transform 0.1s ease, background 0.2s ease, filter 0.1s ease, opacity 0.2s ease;
             text-align: left;
@@ -93,26 +140,25 @@
             background: linear-gradient(135deg, #2563eb, #1e40af);
         }
         .cost-label {
-            font-size: 0.85rem;
-            color: #94a3b8;
+            font-size: 0.8rem;
+            color: #cbd5e1;
         }
         #result-box {
             background-color: #0f172a;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #334155;
-            min-height: 90px;
+            min-height: 85px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             transition: all 0.3s ease;
         }
         
-        /* Prominent popup animation styling */
         #outcome-icon {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             display: none;
             line-height: 1;
         }
@@ -125,28 +171,35 @@
         
         .animate-pop {
             display: block !important;
-            animation: dramaticPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: dramaticPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         #outcome-text {
             margin: 0;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            font-size: 0.85rem;
+            line-height: 1.35;
         }
 
         @keyframes popWin {
-            0% { transform: scale(0.95); background-color: #0f172a; border-color: #334155; }
-            50% { transform: scale(1.05); background-color: #064e3b; border-color: #4ade80; }
+            0% { transform: scale(0.98); background-color: #0f172a; border-color: #334155; }
+            50% { transform: scale(1.02); background-color: #064e3b; border-color: #4ade80; }
             100% { transform: scale(1); background-color: #0f172a; border-color: #4ade80; }
         }
         @keyframes popLose {
-            0% { transform: scale(0.95); background-color: #0f172a; border-color: #334155; }
-            50% { transform: scale(1.05); background-color: #7f1d1d; border-color: #f87171; }
+            0% { transform: scale(0.98); background-color: #0f172a; border-color: #334155; }
+            50% { transform: scale(1.02); background-color: #7f1d1d; border-color: #f87171; }
             100% { transform: scale(1); background-color: #0f172a; border-color: #f87171; }
         }
         @keyframes loadingPulse {
             0%, 100% { opacity: 0.6; }
             50% { opacity: 1; color: #38bdf8; }
+        }
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-4px, 2px); }
+            40% { transform: translate(4px, -2px); }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
         }
         .win-anim {
             animation: popWin 0.4s ease forwards;
@@ -157,25 +210,41 @@
         .loading-anim {
             animation: loadingPulse 0.5s infinite ease-in-out;
         }
+        .shake-screen {
+            animation: screenShake 0.4s ease;
+        }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="game-container" id="game-card">
         <h1>🔮 Magic Quest</h1>
-        <div class="score-board">
-            <p>Energy Tokens: <span id="balance">500</span></p>
+        <div id="zone-badge">🌲 Whispering Woods</div>
+
+        <div class="stats-panel">
+            <span>Energy: <span id="balance">500</span></span>
+            <span>Level <span id="level-num">1</span></span>
+        </div>
+
+        <div class="xp-container">
+            <div class="xp-info">
+                <span>Adventure Rank XP</span>
+                <span id="xp-text">0 / 100</span>
+            </div>
+            <div class="xp-bar-bg">
+                <div class="xp-bar-fill" id="xp-fill"></div>
+            </div>
         </div>
 
         <div class="bet-grid" id="button-container">
-            <button onclick="playTier(1)"><span><strong>Quest 1</strong> 🪙</span><span class="cost-label">Cost: 2 energy</span></button>
-            <button onclick="playTier(10)"><span><strong>Quest 10</strong> 🪙</span><span class="cost-label">Cost: 20 energy</span></button>
-            <button onclick="playTier(25)"><span><strong>Quest 25</strong> 💎</span><span class="cost-label">Cost: 50 energy</span></button>
-            <button onclick="playTier(50)"><span><strong>Quest 50</strong> 🔮</span><span class="cost-label">Cost: 100 energy</span></button>
-            <button onclick="playTier(100)"><span><strong>Quest 100</strong> ⭐</span><span class="cost-label">Cost: 200 energy</span></button>
-            <button onclick="playTier(200)"><span><strong>Quest 200</strong> 🛡️</span><span class="cost-label">Cost: 400 energy</span></button>
-            <button onclick="playTier(300)"><span><strong>Quest 300</strong> ⚔️</span><span class="cost-label">Cost: 600 energy</span></button>
-            <button onclick="playTier(500)"><span><strong>Quest 500</strong> 👑</span><span class="cost-label">Cost: 1,000 energy</span></button>
-            <button onclick="playTier(1000)"><span><strong>Quest 1000</strong> 🐉</span><span class="cost-label">Cost: 2,000 energy</span></button>
+            <button onclick="playTier(1)"><span><strong>Quest 1</strong> 🪙</span><span class="cost-label">Cost: 2</span></button>
+            <button onclick="playTier(10)"><span><strong>Quest 10</strong> 🪙</span><span class="cost-label">Cost: 20</span></button>
+            <button onclick="playTier(25)"><span><strong>Quest 25</strong> 💎</span><span class="cost-label">Cost: 50</span></button>
+            <button onclick="playTier(50)"><span><strong>Quest 50</strong> 🔮</span><span class="cost-label">Cost: 100</span></button>
+            <button onclick="playTier(100)"><span><strong>Quest 100</strong> ⭐</span><span class="cost-label">Cost: 200</span></button>
+            <button onclick="playTier(200)"><span><strong>Quest 200</strong> 🛡️</span><span class="cost-label">Cost: 400</span></button>
+            <button onclick="playTier(300)"><span><strong>Quest 300</strong> ⚔️</span><span class="cost-label">Cost: 600</span></button>
+            <button onclick="playTier(500)"><span><strong>Quest 500</strong> 👑</span><span class="cost-label">Cost: 1,000</span></button>
+            <button onclick="playTier(1000)"><span><strong>Quest 1000</strong> 🐉</span><span class="cost-label">Cost: 2,000</span></button>
         </div>
 
         <div id="result-box">
@@ -209,9 +278,59 @@
         };
 
         var tokens = 500;
+        var level = 1;
+        var xp = 0;
+        var xpToNextLevel = 100;
         var standardWinChance = 0.40;
         var highTierWinChance = 0.15;
         var isPlaying = false;
+
+        // Randomized RPG narrative flavor logs
+        var winFlavors = [
+            "You successfully ambushed a goblin scouting party!",
+            "Your spell cracked open a long-forgotten magic cache!",
+            "You outwitted a woodland beast and claimed its hoard!",
+            "An ancient guardian bowed to your valor and gifted tribute!"
+        ];
+
+        var loseFlavors = [
+            "A hidden trap triggered, forcing a hasty retreat with scraps.",
+            "Monsters overwhelmed your position; you salvaged what you could.",
+            "The dungeon paths shifted, leaving you with minimal loot.",
+            "You narrowly escaped an ambush, salvaging minor supplies."
+        ];
+
+        function updateWorldState() {
+            var badge = document.getElementById("zone-badge");
+            var card = document.getElementById("game-card");
+            
+            if (tokens >= 2500) {
+                badge.innerHTML = "🌌 Abyssal Void";
+                card.style.borderColor = "#818cf8";
+            } else if (tokens >= 1000) {
+                badge.innerHTML = "🏰 Dragon’s Keep";
+                card.style.borderColor = "#facc15";
+            } else {
+                badge.innerHTML = "🌲 Whispering Woods";
+                card.style.borderColor = "#334155";
+            }
+        }
+
+        function addXp(amount) {
+            xp += amount;
+            if (xp >= xpToNextLevel) {
+                xp -= xpToNextLevel;
+                level++;
+                xpToNextLevel = Math.floor(xpToNextLevel * 1.4);
+                if (tg && typeof tg.showAlert === 'function') {
+                    tg.showAlert("🎉 Level Up! You are now Adventure Rank " + level + "!");
+                }
+            }
+            document.getElementById("level-num").innerText = level;
+            document.getElementById("xp-text").innerText = xp + " / " + xpToNextLevel;
+            var pct = Math.min(100, (xp / xpToNextLevel) * 100);
+            document.getElementById("xp-fill").style.width = pct + "%";
+        }
 
         function setButtonsEnabled(enabled) {
             var buttons = document.querySelectorAll("#button-container button");
@@ -240,12 +359,13 @@
             tokens -= tier.cost;
             var balanceEl = document.getElementById("balance");
             balanceEl.innerText = tokens;
+            updateWorldState();
 
             var resultBox = document.getElementById("result-box");
             var outcomeText = document.getElementById("outcome-text");
             var outcomeIcon = document.getElementById("outcome-icon");
+            var gameCard = document.getElementById("game-card");
 
-            // Hide everything and show loading state
             outcomeIcon.style.display = "none";
             outcomeIcon.className = "";
             resultBox.className = "";
@@ -253,8 +373,8 @@
             
             var steps = [
                 "⚔️ Venturing into the unknown...",
-                "🎲 Rolling fate...",
-                "✨ Channeling magic..."
+                "🎲 Rolling tactical dice...",
+                "✨ Resolving combat encounter..."
             ];
             
             var stepIndex = 0;
@@ -275,6 +395,9 @@
                 var finalPayout = 0;
                 var multiplier = 1;
 
+                // Award XP for participating in the quest
+                addXp(Math.max(10, Math.floor(tier.cost / 2)));
+
                 if (isWin) {
                     finalPayout = tier.win;
 
@@ -289,7 +412,7 @@
                     }
                     
                     if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
-                        tg.HapticFeedback.impactOccurred('heavy');
+                        tg.HapticFeedback.impactOccurred(multiplier > 1 ? 'heavy' : 'medium');
                     }
                 } else {
                     finalPayout = tier.lose; 
@@ -299,6 +422,7 @@
                 }
 
                 tokens += finalPayout;
+                updateWorldState();
                 
                 balanceEl.innerText = tokens;
                 balanceEl.classList.add("pulse-balance");
@@ -309,28 +433,33 @@
                 resultBox.className = "";
                 void resultBox.offsetWidth; 
 
-                // Step 1: Clear text temporarily so the icon can pop up dramatically by itself first!
                 outcomeText.innerHTML = "";
                 
                 if (isWin) {
-                    outcomeIcon.innerHTML = "🏆";
+                    outcomeIcon.innerHTML = multiplier > 1 ? "🔥" : "🏆";
                     resultBox.classList.add("win-anim");
+                    
+                    if (multiplier > 1) {
+                        gameCard.classList.add("shake-screen");
+                        setTimeout(function() { gameCard.classList.remove("shake-screen"); }, 400);
+                    }
                 } else {
                     outcomeIcon.innerHTML = "💥";
                     resultBox.classList.add("lose-anim");
                 }
                 
-                // Trigger the bouncing scale-up pop animation on the icon
                 outcomeIcon.className = "";
                 void outcomeIcon.offsetWidth;
                 outcomeIcon.classList.add("animate-pop");
 
-                // Step 2: Brief pause (300ms), then display the text smoothly underneath the popped icon
                 setTimeout(function() {
                     if (isWin) {
-                        outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
+                        var randomFlavor = winFlavors[Math.floor(Math.random() * winFlavors.length)];
+                        var bonusText = multiplier > 1 ? "<br><span style='color: #facc15; font-weight: bold;'>⚡ CRITICAL " + multiplier + "X MULTIPLIER!</span>" : "";
+                        outcomeText.innerHTML = "<b>Victory!</b> +" + finalPayout + " tokens<br><span style='font-size:0.75rem; color:#cbd5e1;'>" + randomFlavor + "</span>" + bonusText;
                     } else {
-                        outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
+                        var randomFlavor = loseFlavors[Math.floor(Math.random() * loseFlavors.length)];
+                        outcomeText.innerHTML = "<b>Setback.</b> Salvaged: " + finalPayout + "<br><span style='font-size:0.75rem; color:#cbd5e1;'>" + randomFlavor + "</span>";
                     }
                 }, 250);
 

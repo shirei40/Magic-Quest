@@ -74,17 +74,22 @@
             border-radius: 10px;
             font-size: 0.95rem;
             cursor: pointer;
-            transition: transform 0.1s ease, background 0.2s ease, filter 0.1s ease;
+            transition: transform 0.1s ease, background 0.2s ease, filter 0.1s ease, opacity 0.2s ease;
             text-align: left;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .bet-grid button:active {
+        .bet-grid button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .bet-grid button:not(:disabled):active {
             transform: scale(0.97);
             filter: brightness(0.9);
         }
-        .bet-grid button:hover {
+        .bet-grid button:not(:disabled):hover {
             background: linear-gradient(135deg, #2563eb, #1e40af);
         }
         .cost-label {
@@ -117,11 +122,19 @@
             25% { transform: translateX(-4px); border-color: #f87171; }
             75% { transform: translateX(4px); border-color: #f87171; }
         }
+        @keyframes loadingGlow {
+            0% { border-color: #334155; }
+            50% { border-color: #38bdf8; background-color: #1e293b; }
+            100% { border-color: #334155; }
+        }
         .win-anim {
             animation: winPulse 0.4s ease;
         }
         .lose-anim {
             animation: loseShake 0.3s ease;
+        }
+        .loading-anim {
+            animation: loadingGlow 0.6s infinite ease-in-out;
         }
     </style>
 </head>
@@ -132,7 +145,7 @@
             <p>Energy Tokens: <span id="balance">500</span></p>
         </div>
 
-        <div class="bet-grid">
+        <div class="bet-grid" id="button-container">
             <button onclick="playTier(1)"><span><strong>Quest 1</strong> 🪙</span><span class="cost-label">Cost: 2 energy</span></button>
             <button onclick="playTier(10)"><span><strong>Quest 10</strong> 🪙</span><span class="cost-label">Cost: 20 energy</span></button>
             <button onclick="playTier(25)"><span><strong>Quest 25</strong> 💎</span><span class="cost-label">Cost: 50 energy</span></button>
@@ -174,10 +187,20 @@
         };
 
         var tokens = 500;
-        var standardWinChance = 0.40; // 40% for levels 1-50
-        var highTierWinChance = 0.15; // Restricted 15% for levels 100-1000
+        var standardWinChance = 0.40;
+        var highTierWinChance = 0.15;
+        var isPlaying = false; // Lockout tracker
+
+        function setButtonsEnabled(enabled) {
+            var buttons = document.querySelectorAll("#button-container button");
+            buttons.forEach(function(btn) {
+                btn.disabled = !enabled;
+            });
+        }
 
         function playTier(betAmount) {
+            if (isPlaying) return; // Prevent spam clicking
+            
             var tier = betTiers[betAmount];
             
             if (!tier || tokens < tier.cost) {
@@ -189,60 +212,95 @@
                 return;
             }
 
+            isPlaying = true;
+            setButtonsEnabled(false); // Lock buttons down
+
+            // Deduct cost immediately
             tokens -= tier.cost;
-
-            // Determine win chance based on whether it's a high tier quest
-            var activeWinChance = tier.highTier ? highTierWinChance : standardWinChance;
-            var isWin = Math.random() <= activeWinChance;
-            var finalPayout = 0;
-            var multiplier = 1;
-
-            if (isWin) {
-                finalPayout = tier.win;
-
-                if (tier.bonusEligible) {
-                    var bonusRoll = Math.random() * 100;
-                    if (bonusRoll <= 5) {
-                        multiplier = 5; 
-                    } else if (bonusRoll <= 20) {
-                        multiplier = 2; 
-                    }
-                    finalPayout *= multiplier;
-                }
-                
-                if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
-                    tg.HapticFeedback.impactOccurred('heavy');
-                }
-            } else {
-                finalPayout = tier.lose; 
-                if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
-                    tg.HapticFeedback.impactOccurred('light');
-                }
-            }
-
-            tokens += finalPayout;
-            
             var balanceEl = document.getElementById("balance");
             balanceEl.innerText = tokens;
-            balanceEl.classList.add("pulse-balance");
-            setTimeout(function() {
-                balanceEl.classList.remove("pulse-balance");
-            }, 200);
 
             var resultBox = document.getElementById("result-box");
             var outcomeText = document.getElementById("outcome-text");
+
+            // Clear previous animations and start loading suspense effect
+            resultBox.className = "";
+            resultBox.classList.add("loading-anim");
             
-            if (isWin) {
-                outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
-                resultBox.classList.remove("lose-anim");
-                void resultBox.offsetWidth;
-                resultBox.classList.add("win-anim");
-            } else {
-                outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
-                resultBox.classList.remove("win-anim");
-                void resultBox.offsetWidth;
-                resultBox.classList.add("lose-anim");
-            }
+            // Suspension flavor texts
+            var steps = [
+                "⚔️ Venturing into the unknown...",
+                "🎲 Rolling fate...",
+                "✨ Channeling magic..."
+            ];
+            
+            var stepIndex = 0;
+            outcomeText.innerHTML = steps[0];
+
+            // Cycle text briefly to build anticipation (takes 900ms total)
+            var interval = setInterval(function() {
+                stepIndex++;
+                if (stepIndex < steps.length) {
+                    outcomeText.innerHTML = steps[stepIndex];
+                }
+            }, 300);
+
+            setTimeout(function() {
+                clearInterval(interval);
+                
+                // Calculate actual outcome after suspense delay
+                var activeWinChance = tier.highTier ? highTierWinChance : standardWinChance;
+                var isWin = Math.random() <= activeWinChance;
+                var finalPayout = 0;
+                var multiplier = 1;
+
+                if (isWin) {
+                    finalPayout = tier.win;
+
+                    if (tier.bonusEligible) {
+                        var bonusRoll = Math.random() * 100;
+                        if (bonusRoll <= 5) {
+                            multiplier = 5; 
+                        } else if (bonusRoll <= 20) {
+                            multiplier = 2; 
+                        }
+                        finalPayout *= multiplier;
+                    }
+                    
+                    if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
+                        tg.HapticFeedback.impactOccurred('heavy');
+                    }
+                } else {
+                    finalPayout = tier.lose; 
+                    if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
+                        tg.HapticFeedback.impactOccurred('light');
+                    }
+                }
+
+                tokens += finalPayout;
+                
+                // Update balance with pulse animation
+                balanceEl.innerText = tokens;
+                balanceEl.classList.add("pulse-balance");
+                setTimeout(function() {
+                    balanceEl.classList.remove("pulse-balance");
+                }, 200);
+
+                // Display final result and apply win/loss animations
+                resultBox.className = ""; // clear loading
+                if (isWin) {
+                    outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
+                    resultBox.classList.add("win-anim");
+                } else {
+                    outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
+                    resultBox.classList.add("lose-anim");
+                }
+
+                // Unlock buttons for the next quest
+                isPlaying = false;
+                setButtonsEnabled(true);
+
+            }, 900); // 900ms suspense duration
         }
     </script>
 </body>

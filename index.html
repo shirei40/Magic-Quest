@@ -129,23 +129,23 @@
     <div class="game-container">
         <h1>🔮 Magic Quest</h1>
         <div class="score-board">
-            <p>Tokens: <span id="balance">500</span></p>
+            <p>Energy Tokens: <span id="balance">500</span></p>
         </div>
 
         <div class="bet-grid">
-            <button onclick="playTier(1)"><span><strong>Bet 1</strong> 🪙</span><span class="cost-label">Cost: 2 credits</span></button>
-            <button onclick="playTier(10)"><span><strong>Bet 10</strong> 🪙</span><span class="cost-label">Cost: 20 credits</span></button>
-            <button onclick="playTier(25)"><span><strong>Bet 25</strong> 💎</span><span class="cost-label">Cost: 50 credits</span></button>
-            <button onclick="playTier(50)"><span><strong>Bet 50</strong> 🔮</span><span class="cost-label">Cost: 100 credits</span></button>
-            <button onclick="playTier(100)"><span><strong>Bet 100</strong> ⭐</span><span class="cost-label">Cost: 200 credits</span></button>
-            <button onclick="playTier(200)"><span><strong>Bet 200</strong> 🛡️</span><span class="cost-label">Cost: 400 credits</span></button>
-            <button onclick="playTier(300)"><span><strong>Bet 300</strong> ⚔️</span><span class="cost-label">Cost: 600 credits</span></button>
-            <button onclick="playTier(500)"><span><strong>Bet 500</strong> 👑</span><span class="cost-label">Cost: 1,000 credits</span></button>
-            <button onclick="playTier(1000)"><span><strong>Bet 1000</strong> 🐉</span><span class="cost-label">Cost: 2,000 credits</span></button>
+            <button onclick="playTier(1)"><span><strong>Quest 1</strong> 🪙</span><span class="cost-label">Cost: 2 energy</span></button>
+            <button onclick="playTier(10)"><span><strong>Quest 10</strong> 🪙</span><span class="cost-label">Cost: 20 energy</span></button>
+            <button onclick="playTier(25)"><span><strong>Quest 25</strong> 💎</span><span class="cost-label">Cost: 50 energy</span></button>
+            <button onclick="playTier(50)"><span><strong>Quest 50</strong> 🔮</span><span class="cost-label">Cost: 100 energy</span></button>
+            <button onclick="playTier(100)"><span><strong>Quest 100</strong> ⭐</span><span class="cost-label">Cost: 200 energy</span></button>
+            <button onclick="playTier(200)"><span><strong>Quest 200</strong> 🛡️</span><span class="cost-label">Cost: 400 energy</span></button>
+            <button onclick="playTier(300)"><span><strong>Quest 300</strong> ⚔️</span><span class="cost-label">Cost: 600 energy</span></button>
+            <button onclick="playTier(500)"><span><strong>Quest 500</strong> 👑</span><span class="cost-label">Cost: 1,000 energy</span></button>
+            <button onclick="playTier(1000)"><span><strong>Quest 1000</strong> 🐉</span><span class="cost-label">Cost: 2,000 energy</span></button>
         </div>
 
         <div id="result-box">
-            <p id="outcome-text">Choose a bet to play!</p>
+            <p id="outcome-text">Choose a quest to embark on!</p>
         </div>
     </div>
 
@@ -166,31 +166,34 @@
             10:   { cost: 20,   lose: 10,   win: 100,   icon: "🪙" },
             25:   { cost: 50,   lose: 10,   win: 520,   icon: "💎" },
             50:   { cost: 100,  lose: 20,   win: 990,   icon: "🔮" },
-            100:  { cost: 200,  lose: 10,   win: 2990,  icon: "⭐", bonusEligible: true },
-            200:  { cost: 400,  lose: 20,   win: 5200,  icon: "🛡️", bonusEligible: true },
-            300:  { cost: 600,  lose: 30,   win: 13140, icon: "⚔️", bonusEligible: true },
-            500:  { cost: 1000, lose: 50,   win: 33440, icon: "👑", bonusEligible: true },
-            1000: { cost: 2000, lose: 200,  win: 99990, icon: "🐉", bonusEligible: true }
+            100:  { cost: 200,  lose: 10,   win: 2990,  icon: "⭐", bonusEligible: true, highTier: true },
+            200:  { cost: 400,  lose: 20,   win: 5200,  icon: "🛡️", bonusEligible: true, highTier: true },
+            300:  { cost: 600,  lose: 30,   win: 13140, icon: "⚔️", bonusEligible: true, highTier: true },
+            500:  { cost: 1000, lose: 50,   win: 33440, icon: "👑", bonusEligible: true, highTier: true },
+            1000: { cost: 2000, lose: 200,  win: 99990, icon: "🐉", bonusEligible: true, highTier: true }
         };
 
         var tokens = 500;
-        var winChance = 0.40;
+        var standardWinChance = 0.40; // 40% for levels 1-50
+        var highTierWinChance = 0.15; // Restricted 15% for levels 100-1000
 
         function playTier(betAmount) {
             var tier = betTiers[betAmount];
             
             if (!tier || tokens < tier.cost) {
                 if (tg && typeof tg.showAlert === 'function') {
-                    tg.showAlert("Not enough tokens to cover this cost!");
+                    tg.showAlert("Not enough energy tokens!");
                 } else {
-                    alert("Not enough tokens to cover this cost!");
+                    alert("Not enough energy tokens!");
                 }
                 return;
             }
 
             tokens -= tier.cost;
 
-            var isWin = Math.random() <= winChance;
+            // Determine win chance based on whether it's a high tier quest
+            var activeWinChance = tier.highTier ? highTierWinChance : standardWinChance;
+            var isWin = Math.random() <= activeWinChance;
             var finalPayout = 0;
             var multiplier = 1;
 
@@ -230,12 +233,12 @@
             var outcomeText = document.getElementById("outcome-text");
             
             if (isWin) {
-                outcomeText.innerHTML = "🎉 Won <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Bonus!)" : "");
+                outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
                 resultBox.classList.remove("lose-anim");
                 void resultBox.offsetWidth;
                 resultBox.classList.add("win-anim");
             } else {
-                outcomeText.innerHTML = "❌ Lost. Received rebate: " + tier.lose;
+                outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
                 resultBox.classList.remove("win-anim");
                 void resultBox.offsetWidth;
                 resultBox.classList.add("lose-anim");

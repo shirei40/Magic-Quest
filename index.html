@@ -54,7 +54,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 320px;
+            max-height: 280px;
             overflow-y: auto;
             padding-right: 4px;
             margin-bottom: 20px;
@@ -98,14 +98,22 @@
         }
         #result-box {
             background-color: #0f172a;
-            padding: 14px;
+            padding: 12px;
             border-radius: 8px;
             border: 1px solid #334155;
-            min-height: 50px;
+            min-height: 80px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             transition: all 0.3s ease;
+        }
+        #outcome-img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            display: none; /* Hidden until result triggers */
         }
         #outcome-text {
             margin: 0;
@@ -157,6 +165,7 @@
         </div>
 
         <div id="result-box">
+            <img id="outcome-img" src="" alt="Outcome animation">
             <p id="outcome-text">Choose a quest to embark on!</p>
         </div>
     </div>
@@ -220,8 +229,10 @@
 
             var resultBox = document.getElementById("result-box");
             var outcomeText = document.getElementById("outcome-text");
+            var outcomeImg = document.getElementById("outcome-img");
 
-            // Reset classes and trigger loading animation
+            // Hide image during loading phase
+            outcomeImg.style.display = "none";
             resultBox.className = "";
             resultBox.classList.add("loading-anim");
             
@@ -280,14 +291,20 @@
                     balanceEl.classList.remove("pulse-balance");
                 }, 200);
 
-                // Force DOM reflow so the animation re-triggers cleanly
                 resultBox.className = "";
                 void resultBox.offsetWidth; 
 
+                // Show dynamic image based on win or loss
                 if (isWin) {
+                    // Celebration GIF link
+                    outcomeImg.src = "https://i.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"; 
+                    outcomeImg.style.display = "block";
                     outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
                     resultBox.classList.add("win-anim");
                 } else {
+                    // Shield/Damage or defeat GIF link
+                    outcomeImg.src = "https://i.giphy.com/media/1xVfBuZlSjlB88zOln/giphy.gif"; 
+                    outcomeImg.style.display = "block";
                     outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
                     resultBox.classList.add("lose-anim");
                 }

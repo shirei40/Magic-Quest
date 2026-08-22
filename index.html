@@ -23,7 +23,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
             box-sizing: border-box;
         }
@@ -43,26 +43,46 @@
         }
         #balance {
             color: #4ade80;
+            display: inline-block;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .pulse-balance {
+            transform: scale(1.2);
+            color: #facc15 !important;
         }
         .bet-grid {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
             margin-bottom: 20px;
+        }
+        .bet-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .bet-grid::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
         }
         .bet-grid button {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             border: none;
-            padding: 14px;
+            padding: 10px 14px;
             border-radius: 10px;
-            font-size: 1rem;
-            font-weight: bold;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: transform 0.1s ease, background 0.2s ease;
+            transition: transform 0.1s ease, background 0.2s ease, filter 0.1s ease;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .bet-grid button:active {
             transform: scale(0.97);
+            filter: brightness(0.9);
         }
         .bet-grid button:hover {
             background: linear-gradient(135deg, #2563eb, #1e40af);
@@ -76,11 +96,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
         }
         #outcome-text {
             margin: 0;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             line-height: 1.4;
+        }
+        @keyframes winPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); border-color: #4ade80; background-color: #064e3b; }
+            100% { transform: scale(1); }
+        }
+        @keyframes loseShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); border-color: #f87171; }
+            75% { transform: translateX(4px); border-color: #f87171; }
+        }
+        .win-anim {
+            animation: winPulse 0.4s ease;
+        }
+        .lose-anim {
+            animation: loseShake 0.3s ease;
         }
     </style>
 </head>
@@ -92,15 +129,15 @@
         </div>
 
         <div class="bet-grid">
-            <button onclick="playTier(10)">
-                <strong>Bet 10</strong><br>Cost: 20 | Win: 100 🪙
-            </button>
-            <button onclick="playTier(100)">
-                <strong>Bet 100 ⭐</strong><br>Cost: 200 | Win: 2,990 💍
-            </button>
-            <button onclick="playTier(1000)">
-                <strong>Bet 1000 🔥</strong><br>Cost: 2000 | Win: 99,990 🐉
-            </button>
+            <button onclick="playTier(1)"><span><strong>Bet 1</strong> (Cost: 2)</span><span>Win: 10 🪙</span></button>
+            <button onclick="playTier(10)"><span><strong>Bet 10</strong> (Cost: 20)</span><span>Win: 100 🪙</span></button>
+            <button onclick="playTier(25)"><span><strong>Bet 25</strong> (Cost: 50)</span><span>Win: 520 💎</span></button>
+            <button onclick="playTier(50)"><span><strong>Bet 50</strong> (Cost: 100)</span><span>Win: 990 🔮</span></button>
+            <button onclick="playTier(100)"><span><strong>Bet 100</strong> (Cost: 200)</span><span>Win: 2,990 ⭐</span></button>
+            <button onclick="playTier(200)"><span><strong>Bet 200</strong> (Cost: 400)</span><span>Win: 5,200 🛡️</span></button>
+            <button onclick="playTier(300)"><span><strong>Bet 300</strong> (Cost: 600)</span><span>Win: 13,140 ⚔️</span></button>
+            <button onclick="playTier(500)"><span><strong>Bet 500</strong> (Cost: 1000)</span><span>Win: 33,440 👑</span></button>
+            <button onclick="playTier(1000)"><span><strong>Bet 1000</strong> (Cost: 2000)</span><span>Win: 99,990 🐉</span></button>
         </div>
 
         <div id="result-box">
@@ -121,9 +158,15 @@
         }
 
         var betTiers = {
-            10:  { cost: 20,   lose: 10,   win: 100,   icon: "🪙 Gold Coin" },
-            100: { cost: 200,  lose: 10,   win: 2990,  icon: "💍 Ring", bonusEligible: true },
-            1000:{ cost: 2000, lose: 200,  win: 99990, icon: "🐉 Water Dragon", bonusEligible: true }
+            1:    { cost: 2,    lose: 1,    win: 10,    icon: "🪙" },
+            10:   { cost: 20,   lose: 10,   win: 100,   icon: "🪙" },
+            25:   { cost: 50,   lose: 10,   win: 520,   icon: "💎" },
+            50:   { cost: 100,  lose: 20,   win: 990,   icon: "🔮" },
+            100:  { cost: 200,  lose: 10,   win: 2990,  icon: "⭐", bonusEligible: true },
+            200:  { cost: 400,  lose: 20,   win: 5200,  icon: "🛡️", bonusEligible: true },
+            300:  { cost: 600,  lose: 30,   win: 13140, icon: "⚔️", bonusEligible: true },
+            500:  { cost: 1000, lose: 50,   win: 33440, icon: "👑", bonusEligible: true },
+            1000: { cost: 2000, lose: 200,  win: 99990, icon: "🐉", bonusEligible: true }
         };
 
         var tokens = 500;
@@ -172,13 +215,26 @@
 
             tokens += finalPayout;
             
-            document.getElementById("balance").innerText = tokens;
+            var balanceEl = document.getElementById("balance");
+            balanceEl.innerText = tokens;
+            balanceEl.classList.add("pulse-balance");
+            setTimeout(function() {
+                balanceEl.classList.remove("pulse-balance");
+            }, 200);
+
+            var resultBox = document.getElementById("result-box");
             var outcomeText = document.getElementById("outcome-text");
             
             if (isWin) {
                 outcomeText.innerHTML = "🎉 Won <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Bonus!)" : "");
+                resultBox.classList.remove("lose-anim");
+                void resultBox.offsetWidth;
+                resultBox.classList.add("win-anim");
             } else {
                 outcomeText.innerHTML = "❌ Lost. Received rebate: " + tier.lose;
+                resultBox.classList.remove("win-anim");
+                void resultBox.offsetWidth;
+                resultBox.classList.add("lose-anim");
             }
         }
     </script>

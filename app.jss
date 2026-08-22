@@ -1,7 +1,9 @@
-// Initialize Telegram Web App
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+// Initialize Telegram Web App safely
+let tg = window.Telegram.WebApp;
+if (tg && tg.initData) {
+    tg.ready();
+    tg.expand();
+}
 
 let tokens = 500;
 const winChance = 0.40; // 40% win rate
@@ -17,7 +19,11 @@ function playTier(betAmount) {
     const tier = betTiers[betAmount];
     
     if (!tier || tokens < tier.cost) {
-        tg.showAlert("Not enough tokens to cover this cost!");
+        if (tg && tg.showAlert) {
+            tg.showAlert("Not enough tokens to cover this cost!");
+        } else {
+            alert("Not enough tokens to cover this cost!");
+        }
         return;
     }
 
@@ -32,31 +38,35 @@ function playTier(betAmount) {
     if (isWin) {
         finalPayout = tier.win;
 
-        // Apply x2 or x5 bonus for bets >= 100
         if (tier.bonusEligible) {
             const bonusRoll = Math.random() * 100;
             if (bonusRoll <= 5) {
-                multiplier = 5; // 5% chance
+                multiplier = 5; 
             } else if (bonusRoll <= 20) {
-                multiplier = 2; // 15% chance
+                multiplier = 2; 
             }
             finalPayout *= multiplier;
         }
-        tg.HapticFeedback.impactOccurred('heavy'); // Phone vibrates on win
+        
+        if (tg && tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('heavy');
+        }
     } else {
         finalPayout = tier.lose; // Rebate
-        tg.HapticFeedback.impactOccurred('light'); // Phone vibrates on loss
+        if (tg && tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
     }
 
     // Update balance
     tokens += finalPayout;
     
-    // Update UI text
+    // Update UI text securely
     document.getElementById("balance").innerText = tokens;
     const outcomeText = document.getElementById("outcome-text");
     
     if (isWin) {
-        outcomeText.innerHTML = `🎉 Won <b>${finalPayout}</b> tokens!<br>Reward Icon: ${tier.icon} ${multiplier > 1 ? `(x${multiplier} Bonus!)` : ''}`;
+        outcomeText.innerHTML = `🎉 Won <b>${finalPayout}</b> tokens!<br>Reward: ${tier.icon} ${multiplier > 1 ? `(x${multiplier} Bonus!)` : ''}`;
     } else {
         outcomeText.innerHTML = `❌ Lost. Received rebate: ${tier.lose}`;
     }

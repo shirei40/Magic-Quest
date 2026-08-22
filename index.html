@@ -54,10 +54,10 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 280px;
+            max-height: 260px;
             overflow-y: auto;
             padding-right: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .bet-grid::-webkit-scrollbar {
             width: 6px;
@@ -70,7 +70,7 @@
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             border: none;
-            padding: 12px 14px;
+            padding: 10px 14px;
             border-radius: 10px;
             font-size: 0.95rem;
             cursor: pointer;
@@ -101,7 +101,7 @@
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #334155;
-            min-height: 80px;
+            min-height: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -110,10 +110,10 @@
             transition: all 0.3s ease;
         }
         #outcome-img {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             object-fit: contain;
-            display: none; /* Hidden until result triggers */
+            display: none;
         }
         #outcome-text {
             margin: 0;
@@ -231,7 +231,6 @@
             var outcomeText = document.getElementById("outcome-text");
             var outcomeImg = document.getElementById("outcome-img");
 
-            // Hide image during loading phase
             outcomeImg.style.display = "none";
             resultBox.className = "";
             resultBox.classList.add("loading-anim");
@@ -294,16 +293,14 @@
                 resultBox.className = "";
                 void resultBox.offsetWidth; 
 
-                // Show dynamic image based on win or loss
+                // Updated direct asset links for high compatibility
                 if (isWin) {
-                    // Celebration GIF link
-                    outcomeImg.src = "https://i.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"; 
+                    outcomeImg.src = "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3RkdnVjYnU5NHBlanZqN204NW5xM2ptdjR2bjE2djlnMnhwYmN1eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26ufdipQqU2lhNA4g/giphy.gif";
                     outcomeImg.style.display = "block";
                     outcomeText.innerHTML = "🎉 Quest Success! Earned <b>" + finalPayout + "</b> tokens!<br>Reward: " + tier.icon + (multiplier > 1 ? " (x" + multiplier + " Critical Bonus!)" : "");
                     resultBox.classList.add("win-anim");
                 } else {
-                    // Shield/Damage or defeat GIF link
-                    outcomeImg.src = "https://i.giphy.com/media/1xVfBuZlSjlB88zOln/giphy.gif"; 
+                    outcomeImg.src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmtjcG53Z3NqNHl0bTQ2aXF2dG04Y3hjdnhzNDZ4bzV3cXN3YmN0ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6ZtaO9BZHcOjmErm/giphy.gif";
                     outcomeImg.style.display = "block";
                     outcomeText.innerHTML = "🛡️ Quest Failed. Recovered salvage: " + tier.lose;
                     resultBox.classList.add("lose-anim");
